@@ -22,7 +22,7 @@ scrape_season_data <- function(url) {
 }
 
 # Read in the "last scrape date" file, or create it with a date a few years ago if it doesn't exist
-if (as.integer(format(Sys.Date(), "%m")) >= 8) { # web page is broken out by season, so "NHL_2024__games.html..." contains 2023 fall games
+if (as.integer(format(Sys.Date(), "%m")) >= 8) { # web page is broken out by season, so "NHL_2024_games.html..." contains 2023 fall games
   current_year <- as.integer(format(Sys.Date(), "%Y")) + 1
 } 
 
@@ -32,7 +32,7 @@ season_urls <- map(current_year, ~ paste0('https://www.hockey-reference.com/leag
 season_data <- map(season_urls, scrape_season_data) %>% 
   compact() %>%  # remove NULL values
   bind_rows(.id="playoff") %>% # convert the list of dataframes to a single dataframe, create id column to indicate regular/post-season
-  mutate(is_playoff = as.numeric(playoff)-1) %>% #true = 1
+  mutate(is_playoffs = ifelse(playoff == "2", TRUE,FALSE)) %>% 
   select(-playoff) %>% 
   mutate(attendance = as.character(attendance)) %>% 
   mutate(attendance = as.integer(gsub(",", "", attendance))) %>%  # Remove thousands comma from attendance column
